@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>VIBRANIUM CHESS — Ritik Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#090807;--bg2:#15110e;--panel:rgba(28,23,19,.78);--line:rgba(211,169,82,.18);--gold:#c9a24a;--gold2:#f0d27e;--cream:#f2e9d9;--muted:#a99b88;--danger:#c85c4b;--light:#f5f5f5;--light2:#f5f5f5;--dark:#111111;--dark2:#111111}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,sans-serif;color:var(--cream);background:radial-gradient(900px 500px at 50% -10%,#5b431b22,transparent 65%),linear-gradient(180deg,var(--bg2),var(--bg));}
+button,input{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+header{height:72px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#090807b8;backdrop-filter:blur(14px);position:sticky;top:0;z-index:20}
+.brand{display:flex;gap:11px;align-items:center}.brand .mark{font-size:27px;color:var(--gold2);filter:drop-shadow(0 0 9px #c9a24a55)}.brand h1{font:700 27px 'Cormorant Garamond',serif;letter-spacing:.06em;margin:0;color:var(--gold2)}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.22em}
+.nav{display:flex;gap:8px}.btn{border:1px solid var(--line);background:#ffffff08;color:var(--cream);padding:9px 14px;border-radius:10px;transition:.18s}.btn:hover{border-color:var(--gold);background:#c9a24a14;transform:translateY(-1px)}.btn.primary{border-color:transparent;color:#231a0c;background:linear-gradient(#f0d27e,#c9a24a);font-weight:700}
+body{overflow-x:hidden}main{max-width:1420px;margin:auto;padding:22px 28px 30px;display:grid;grid-template-columns:minmax(560px,1fr) 330px;gap:24px;align-items:start;justify-content:center}
+.boardCol{min-width:0}.statusbar{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;margin-bottom:10px}.status strong{color:var(--cream)}.thinking{color:var(--gold2);font-style:italic}.dots span{animation:blink 1.2s infinite;opacity:.2}.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}@keyframes blink{40%{opacity:1}}
+.boardFrame{position:relative;padding:22px;border-radius:20px;background:linear-gradient(155deg,#2a1c10,#1a1108);box-shadow:0 24px 60px -20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05),0 0 0 1px rgba(201,162,74,.15)}
+#board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:min(78vw,560px);height:min(78vw,560px);border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 0 0 2px rgba(0,0,0,.35)}
+.square{position:relative;display:flex;align-items:center;justify-content:center;user-select:none}.square.light{background:linear-gradient(160deg,#f3dcb2,#e8c99b)}.square.dark{background:linear-gradient(160deg,#7a4a2d,#5c3520)}
+.square.selected{box-shadow:inset 0 0 0 3px rgba(201,162,74,.85)}.square.last.light{background:linear-gradient(160deg,#f0dfa0,#e6cf86)}.square.last.dark{background:linear-gradient(160deg,#8a6a2e,#6e5324)}.square.check{box-shadow:inset 0 0 0 3px var(--danger),inset 0 0 22px rgba(201,92,74,.55)}
+.coord{position:absolute;font-size:9px;font-weight:600;opacity:.55}.file{right:3px;bottom:2px}.rank{left:3px;top:2px}.light .coord{color:#5c3520}.dark .coord{color:#f3dcb2}
+.piece{font-family:'DejaVu Sans','Segoe UI Symbol','Noto Sans Symbols 2',serif;font-size:min(9vw,52px);line-height:1;cursor:grab;z-index:2;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5));transition:transform .18s ease,filter .18s ease}.square:hover .piece{transform:translateY(-2px) scale(1.06)}.piece.w{color:#faf3e4;-webkit-text-stroke:1px #4a3216;text-shadow:none}.piece.b{color:#231a10;-webkit-text-stroke:1px #0006;text-shadow:none}.legalDot{width:26%;height:26%;border-radius:50%;background:rgba(30,20,10,.35);position:absolute}.captureRing{position:absolute;inset:0;border:4px solid rgba(201,92,74,.65);border-radius:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;backdrop-filter:blur(14px);box-shadow:0 25px 60px #0008}
+.player{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);transition:.2s}.player.active{background:#ffffff08;border-radius:10px;padding-left:8px;padding-right:8px}.turnBadge{font-size:9px;letter-spacing:.08em;font-weight:800;color:#17120b;background:linear-gradient(#f0d27e,#c9a24a);padding:5px 7px;border-radius:999px;white-space:nowrap}.who{display:flex;gap:10px;align-items:center}.avatar{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#ffffff09;border:1px solid var(--line);font-size:20px}.avatar.ai{background:linear-gradient(#f0d27e,#c9a24a);color:#241b0d}.name{font-weight:700}.sub{font-size:10px;color:var(--muted);margin-top:2px}.led{display:inline-block;width:6px;height:6px;background:#61ce80;border-radius:50%;box-shadow:0 0 8px #61ce80;margin-right:5px}
+.label{font-size:10px;letter-spacing:.14em;color:var(--muted);margin:17px 0 8px}.diff{display:flex;gap:6px}.diff button{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 0;border-radius:8px}.diff button.active{background:linear-gradient(#f0d27e,#c9a24a);color:#241b0d;border-color:transparent;font-weight:700}
+.history{max-height:170px;overflow:auto;font-size:12px;line-height:1.9;color:var(--muted)}.captured{min-height:25px;font-size:17px;word-spacing:2px}.actions{display:flex;gap:7px;margin-top:16px}.actions .btn{flex:1}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:12px 20px 32px}footer b{color:var(--gold2)}footer a{color:var(--gold2);text-decoration:none}
+.overlay{position:fixed;inset:0;background:#050403dd;backdrop-filter:blur(8px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}.modal{width:min(480px,100%);background:linear-gradient(160deg,#251b11,#130d08);border:1px solid var(--line);border-radius:22px;padding:30px;box-shadow:0 30px 100px #000d}.modal h2{font:700 40px 'Cormorant Garamond',serif;color:var(--gold2);margin:0 0 5px}.modal .tag{color:var(--muted);font-size:11px;letter-spacing:.2em;margin-bottom:25px}.choiceGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.choice{padding:16px 10px;border:1px solid var(--line);background:#ffffff05;border-radius:13px;color:var(--cream);text-align:center}.choice:hover{border-color:var(--gold);background:#c9a24a10}.choice b{display:block;color:var(--gold2);margin-bottom:5px}.field{margin:11px 0}.field label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}.field input,.field select{width:100%;padding:11px 12px;background:#0b0907;border:1px solid var(--line);border-radius:10px;color:var(--cream);outline:none}.field input:focus{border-color:var(--gold)}.row{display:flex;gap:9px}.row>*{flex:1}.roomCode{font:700 34px 'Cormorant Garamond',serif;letter-spacing:.22em;color:var(--gold2);text-align:center;padding:15px;border:1px dashed #c9a24a55;border-radius:13px;margin:15px 0}.hint{color:var(--muted);font-size:11px;line-height:1.6}.center{text-align:center}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#21180f;border:1px solid var(--line);padding:10px 15px;border-radius:10px;color:var(--cream);opacity:0;pointer-events:none;transition:.25s;z-index:200}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:980px){main{grid-template-columns:1fr;max-width:760px;padding:18px}.boardCol{display:flex;flex-direction:column;align-items:center}.boardFrame{padding:12px;width:fit-content;max-width:100%}.panel{width:100%}}@media(max-width:600px){header{padding:0 10px;height:58px}.brand h1{font-size:20px}.brand small{display:none}.brand .mark{font-size:22px}.nav{gap:4px}.nav .btn{padding:7px 8px;font-size:11px}.nav .desktop{display:none}main{padding:10px 8px 18px;gap:12px}.statusbar{width:100%;font-size:11px}.boardFrame{padding:7px;border-radius:12px;width:calc(100vw - 16px);max-width:520px}.boardFrame #board{width:100%;height:auto;aspect-ratio:1;max-width:520px}.piece{font-size:clamp(28px,10vw,52px)}.coord{font-size:7px}.choiceGrid{grid-template-columns:1fr}.modal{padding:20px;border-radius:18px}.modal h2{font-size:34px}.roomCode{font-size:28px}.actions{flex-wrap:wrap}.actions .btn{min-width:30%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="mark">♞</span><div><h1>VIBRANIUM CHESS</h1><small>STRATEGY · PRECISION · POWER</small></div></div>
+  <div class="nav"><button class="btn desktop" id="shareBtn">Share</button><button class="btn" id="soundBtn">Sound</button><button class="btn desktop" id="undoBtn">Undo</button><button class="btn primary" id="newBtn">New Game</button></div>
+</header>
+
+<main id="gameUI" class="hidden">
+  <section class="boardCol">
+    <div class="statusbar"><div><span id="turnDot">●</span> <span id="statusText">Your move</span></div><div id="thinking" class="thinking hidden">JARVIS is thinking <span class="dots"><span>.</span><span>.</span><span>.</span></span></div></div>
+    <div class="boardFrame"><div id="board"></div></div>
+  </section>
+  <aside class="panel">
+    <div class="player"><div class="who"><div class="avatar">♟</div><div><div class="name" id="whiteName">Player</div><div class="sub">WHITE</div></div></div><span id="whiteYou"></span></div>
+    <div class="player"><div class="who"><div class="avatar ai">♞</div><div><div class="name" id="blackName">JARVIS</div><div class="sub" id="blackSub">BLACK</div></div></div></div>
+    <div class="label">DIFFICULTY</div><div class="diff" id="diff"><button data-d="easy">Easy</button><button data-d="medium" class="active">Medium</button><button data-d="hard">Hard</button></div>
+    <div class="label">CAPTURED</div><div class="captured" id="captured"></div>
+    <div class="label">MOVE HISTORY</div><div class="history" id="history">No moves yet.</div>
+    <div class="actions"><button class="btn" id="flipBtn">Flip Board</button><button class="btn" id="leaveBtn">Exit</button></div>
+  </aside>
+</main>
+
+<footer>VIBRANIUM CHESS · Built by <b>Ritik Sen</b> · <a href="https://github.com/Ritiksen04" target="_blank" rel="noopener">GitHub: Ritiksen04</a></footer>
+
+<div class="overlay" id="startOverlay">
+  <div class="modal">
+    <h2>VIBRANIUM CHESS</h2><div class="tag">A MODERN CHESS EXPERIENCE</div>
+    <div id="modePick">
+      <div class="choiceGrid">
+        <button class="choice" data-mode="computer"><b>♟ VS AI</b>Offline computer</button>
+        <button class="choice" data-mode="local"><b>♜ LOCAL</b>Two players</button>
+        <button class="choice" data-mode="online"><b>◈ ONLINE</b>Connect devices</button>
+      </div>
+      <p class="hint center" style="margin-top:20px">Choose your mode. Your name is saved only for this game.</p>
+    </div>
+    <div id="setup" class="hidden">
+      <div id="singleNameField" class="field"><label>YOUR NAME</label><input id="playerName" maxlength="24" value="Ritik Sen"></div>
+      <div id="localFields" class="hidden">
+        <div class="field"><label>PLAYER 1 · WHITE</label><input id="localWhiteName" maxlength="24" value="Ritik Sen"></div>
+        <div class="field"><label>PLAYER 2 · BLACK</label><input id="localBlackName" maxlength="24" value="Player 2"></div>
+      </div>
+      <div id="colorField" class="field"><label>PLAY AS</label><select id="color"><option value="white">White</option><option value="black">Black</option></select></div>
+      <div id="difficultyField" class="field"><label>AI DIFFICULTY</label><select id="difficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
+      <div id="roomFields" class="hidden">
+        <div class="row"><button class="btn primary" id="createRoom">Create Room</button><button class="btn" id="showJoin">Join Room</button></div>
+        <div id="joinBox" class="hidden field"><label>ROOM CODE</label><input id="roomCodeInput" maxlength="6" placeholder="ABC123" style="text-transform:uppercase"></div>
+      </div>
+      <div class="row" style="margin-top:15px"><button class="btn" id="backMode">Back</button><button class="btn primary" id="startBtn">Start Game</button></div>
+      <p id="setupHint" class="hint"></p>
+    </div>
+    <div id="roomReady" class="hidden center">
+      <div class="hint">Share this room code with the other player:</div>
+      <div class="roomCode" id="roomCodeDisplay">------</div>
+      <button class="btn primary" id="copyRoom">Copy Invite</button>
+      <p class="hint" id="roomWait">Waiting for opponent…</p>
+      <button class="btn" id="cancelRoom">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="resultOverlay"><div class="modal center"><h2 id="resultTitle">CHECKMATE</h2><p id="resultText"></p><div class="row"><button class="btn primary" id="playAgain">New Game</button><button class="btn" id="resultExit">Exit</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const glyph={w:{K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙'},b:{K:'♚',Q:'♛',R:'♜',B:'♝',N:'♞',P:'♟'}};
+let mode=null, token=null, room=null, color='white', orientation='white', state=null, selected=null, legalTargets=[], pollTimer=null, soundOn=false, joined=false, leaving=false; window.shareUrl='';
+const $=id=>document.getElementById(id);
+function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
+function api(url,opt={}){return fetch(url,{headers:{'Content-Type':'application/json'},...opt}).then(async r=>{let d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');return d})}
+function setMode(m){
+  mode=m;$('modePick').classList.add('hidden');$('setup').classList.remove('hidden');
+  const online=m==='online', local=m==='local';
+  $('roomFields').classList.toggle('hidden',!online);
+  $('localFields').classList.toggle('hidden',!local);
+  $('singleNameField').classList.toggle('hidden',local);
+  $('colorField').classList.toggle('hidden',m!=='computer');
+  $('difficultyField').classList.toggle('hidden',m!=='computer');
+  $('startBtn').classList.toggle('hidden',online);
+  $('joinBox').classList.add('hidden');$('startBtn').textContent=local?'Start Game':'Start Game';
+  $('createRoom').classList.add('primary');$('showJoin').classList.remove('primary');
+  $('setupHint').textContent=local?'Two players on one device. Enter both names and play on the same screen.':online?'Create a room and share the HTTP invite link with the other player.':'Play offline against JARVIS.';
+}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+$('backMode').onclick=()=>{$('setup').classList.add('hidden');$('modePick').classList.remove('hidden')};
+$('showJoin').onclick=()=>{$('joinBox').classList.remove('hidden');$('showJoin').classList.add('primary');$('createRoom').classList.remove('primary');$('startBtn').classList.remove('hidden');$('startBtn').textContent='Join Room';};
+$('createRoom').onclick=createRoom;
+$('startBtn').onclick=()=>{ if(mode==='local') startLocal(); else if(mode==='online') joinRoom(); else startOffline(); };
+$('newBtn').onclick=()=>{stopPoll();$('startOverlay').classList.remove('hidden');$('gameUI').classList.add('hidden');$('modePick').classList.remove('hidden');$('setup').classList.add('hidden');};
+$('leaveBtn').onclick=async()=>{if(mode==='online'&&room&&token&&!leaving){leaving=true;try{await api('/api/room/'+room+'/leave',{method:'POST',body:JSON.stringify({token})})}catch{} } location.reload();};
+$('flipBtn').onclick=()=>{orientation=orientation==='white'?'black':'white';render()};
+$('soundBtn').onclick=()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'Sound On':'Sound Off'};
+$('undoBtn').onclick=()=>{if(!token)return;let u=mode==='online'?'/api/room/'+room+'/undo':mode==='local'?'/api/local2/undo/'+token:'/api/local/undo/'+token;let body=mode==='online'?{token}:{};api(u,{method:'POST',body:JSON.stringify(body)}).then(d=>update(d.state)).catch(e=>toast(e.message));};
+$('diff').onclick=e=>{if(e.target.dataset.d){document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('active'));e.target.classList.add('active'); if(mode==='computer'&&token) toast('Difficulty applies to the next game.')}}; 
+$('copyRoom').onclick=async()=>{let url=window.shareUrl||location.origin+'/?room='+room+'&mode='+encodeURIComponent(mode);try{await navigator.clipboard.writeText(url);toast('Link copied')}catch{prompt('Copy this link',url)}};
+$('shareBtn').onclick=async()=>{if(!room){toast('Start or join a game first');return}let url=window.shareUrl||location.origin+'/?room='+room+'&mode='+encodeURIComponent(mode);try{if(navigator.share){await navigator.share({url})}else{await navigator.clipboard.writeText(url);toast('Link copied')}}catch(e){if(e?.name!=='AbortError'){try{await navigator.clipboard.writeText(url);toast('Link copied')}catch{prompt('Copy this link',url)}}}};
+$('cancelRoom').onclick=()=>{location.reload()};
+$('playAgain').onclick=()=>{$('resultOverlay').classList.add('hidden');$('newBtn').click()}; $('resultExit').onclick=()=>location.reload();
+
+async function startOffline(){
+  const name=$('playerName').value.trim()||'Player';
+  color=$('color').value; orientation=color;
+  const d=await api('/api/local/new',{method:'POST',body:JSON.stringify({name,color,difficulty:$('difficulty').value})});
+  token=d.token;state=d.state;showGame();startPoll();
+}
+async function startLocal(){
+  const whiteName=$('localWhiteName').value.trim()||'Player 1';
+  const blackName=$('localBlackName').value.trim()||'Player 2';
+  const d=await api('/api/local2/new',{method:'POST',body:JSON.stringify({white_name:whiteName,black_name:blackName})});
+  mode='local';token=d.token;color='white';orientation='white';state=d.state;showGame();startPoll();
+}
+async function createRoom(){
+  const name=$('playerName').value.trim()||'Player';
+  const d=await api('/api/room/create',{method:'POST',body:JSON.stringify({name,mode:'online'})});
+  mode='online';room=d.room;token=d.token;color='white';orientation='white';state=d.state;window.shareUrl=d.share_url||location.origin+'/?room='+room+'&mode=online';
+  $('setup').classList.add('hidden');$('roomReady').classList.remove('hidden');$('roomCodeDisplay').textContent=room;
+  startPoll();update(d.state);
+}
+async function joinRoom(){
+  const code=$('roomCodeInput').value.trim().toUpperCase();if(code.length<4){toast('Enter the room code');return}
+  const name=$('playerName').value.trim()||'Player 2';
+  try{const d=await api('/api/room/join',{method:'POST',body:JSON.stringify({room:code,name,mode:'online'})});mode='online';room=d.room;token=d.token;color=d.color||'black';orientation=color;state=d.state;window.shareUrl=d.share_url||location.origin+'/?room='+room+'&mode=online';$('startOverlay').classList.add('hidden');showGame();startPoll();}catch(e){toast(e.message)}
+}
+function showGame(){$('startOverlay').classList.add('hidden');$('gameUI').classList.remove('hidden');render();updatePlayers()}
+function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null}}
+function startPoll(){
+  stopPoll();
+  pollTimer=setInterval(async()=>{
+    try{
+      let d;
+      if(mode==='online') d=await api('/api/room/'+room+'/state?token='+encodeURIComponent(token));
+      else if(mode==='local') d=await api('/api/local2/state/'+token);
+      else d=await api('/api/local/state/'+token);
+      if(!state||d.state.version!==state.version){
+        update(d.state);
+        if(mode==='online' && d.state.black_name!=='Waiting for opponent'){
+          $('startOverlay').classList.add('hidden');$('gameUI').classList.remove('hidden');
+        }
+      }
+    }catch(e){}
+  },700);
+}
+function update(s){state=s;updatePlayers();render();checkResult()}
+function updatePlayers(){const w=state?.white_name||'White',b=state?.black_name||'Black';$('whiteName').textContent=w;$('blackName').textContent=mode==='computer'?'JARVIS':b;$('blackSub').innerHTML=mode==='computer'?'BLACK':(state?.black_name==='Waiting for opponent'?'<span class="led"></span>Waiting':'<span class="led"></span>Connected');$('whiteYou').innerHTML=state?.turn==='white'?'<span class="turnBadge">'+(mode==='local'?(w+' TURN'):(color==='white'?'YOUR TURN':w+' TURN'))+'</span>':'';let blackBadge=state?.turn==='black'?'<span class="turnBadge">'+(mode==='local'?(b+' TURN'):(color==='black'?'YOUR TURN':b+' TURN'))+'</span>':'';let bp=$('blackName').closest('.player');if(bp)bp.querySelector('.turnBadge')?.remove();if(blackBadge){let x=document.createElement('span');x.innerHTML=blackBadge;bp?.appendChild(x.firstChild)}let wp=$('whiteName').closest('.player');wp?.classList.toggle('active',state?.turn==='white');bp?.classList.toggle('active',state?.turn==='black');}
+function squareName(r,c){return 'abcdefgh'[c]+(8-r)}
+function canInteract(){if(!state)return false;if(state.status==='checkmate'||state.status==='stalemate'||state.opponent_left)return false;return mode==='local'||state.turn===color}
+function pieceAt(r,c){return state.board[r][c]}
+function render(){
+  if(!state)return;
+  const b=$('board');b.innerHTML='';
+  const rows=[0,1,2,3,4,5,6,7], cols=[0,1,2,3,4,5,6,7];
+  if(orientation==='black'){rows.reverse();cols.reverse()}
+  const last=state.last_move;
+  for(const r of rows)for(const c of cols){
+    const sq=squareName(r,c), el=document.createElement('div');el.className='square '+(((r+c)%2)?'light':'dark');el.dataset.square=sq;
+    if(last&&last.slice(0,2)===sq||last&&last.slice(2,4)===sq)el.classList.add('last');
+    if(selected===sq)el.classList.add('selected');
+    if(legalTargets.includes(sq))el.innerHTML='<span class="'+(pieceAt(r,c)?'captureRing':'legalDot')+'"></span>';
+    const p=pieceAt(r,c);if(p){const sp=document.createElement('span');sp.className='piece '+p.c;sp.textContent=glyph[p.c][p.t];el.appendChild(sp)}
+    if(c=== (orientation==='black'?7:0)){} // coords handled below
+    const file=document.createElement('span');file.className='coord file';file.textContent='abcdefgh'[c]; if((orientation==='white'&&r===7)||(orientation==='black'&&r===0))el.appendChild(file);
+    const rank=document.createElement('span');rank.className='coord rank';rank.textContent=8-r;if((orientation==='white'&&c===0)||(orientation==='black'&&c===7))el.appendChild(rank);
+    el.onclick=()=>clickSquare(sq);b.appendChild(el);
+  }
+  const turnName=state.turn==='white'?(state.white_name||'White'):(state.black_name||'Black');$('statusText').textContent=state.opponent_left?'PLAYER LEFT':state.status==='check'?'CHECK':state.status==='checkmate'?'CHECKMATE':state.status==='stalemate'?'STALEMATE':(mode==='local'||state.turn===color)?(mode==='local'?turnName+'\'s turn':'Your turn · '+turnName):turnName+'\'s turn';
+  $('thinking').classList.toggle('hidden',false);
+  $('thinking').classList.add('hidden');
+  $('history').innerHTML=state.move_history.length?state.move_history.map((m,i)=>`<div><span style="color:var(--gold2)">${Math.floor(i/2)+1}.</span> ${i%2?'… ':''}${m}</div>`).join(''):'No moves yet.';
+  $('captured').textContent=[...(state.captured?.w||[]),...(state.captured?.b||[])].join(' ');
+}
+function clickSquare(sq){
+  if(!canInteract())return;
+  const r=8-Number(sq[1]),c='abcdefgh'.indexOf(sq[0]),p=pieceAt(r,c);
+  if(selected&&legalTargets.includes(sq)){submitMove(selected+sq);selected=null;legalTargets=[];render();return}
+  if(p){
+    const side=state.turn==='white'?'w':'b';
+    const allowedSide=mode==='local'?side:color[0];
+    if(p.c===allowedSide&&p.c===side){
+      selected=sq;legalTargets=guessTargets(sq);render();return;
+    }
+  }
+  selected=null;legalTargets=[];render();
+}
+function guessTargets(from){
+  // Frontend only displays candidate squares; Python is authoritative.
+  const r=8-Number(from[1]),c='abcdefgh'.indexOf(from[0]),p=pieceAt(r,c),out=[];
+  if(!p)return out;const add=(rr,cc)=>{if(rr<0||rr>7||cc<0||cc>7)return false;const t=pieceAt(rr,cc);if(!t){out.push(squareName(rr,cc));return true}if(t.c!==p.c)out.push(squareName(rr,cc));return false};
+  if(p.t==='N'){for(const [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]])add(r+dr,c+dc)}
+  else if(p.t==='K'){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)if(dr||dc)add(r+dr,c+dc)}
+  else if(p.t==='P'){let d=p.c==='w'?-1:1;if(!pieceAt(r+d,c))add(r+d,c);for(const dc of [-1,1]){let rr=r+d,cc=c+dc;if(rr>=0&&rr<8&&cc>=0&&cc<8){let t=pieceAt(rr,cc);if(t&&t.c!==p.c)out.push(squareName(rr,cc))}}}
+  else {let dirs=p.t==='B'?[[-1,-1],[-1,1],[1,-1],[1,1]]:p.t==='R'?[[-1,0],[1,0],[0,-1],[0,1]]:[[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]];for(const [dr,dc] of dirs){let rr=r+dr,cc=c+dc;while(add(rr,cc)){rr+=dr;cc+=dc}}}
+  return out;
+}
+async function submitMove(uci){
+  try{
+    $('thinking').classList.remove('hidden');
+    let d;
+    if(mode==='online')d=await api('/api/room/'+room+'/move',{method:'POST',body:JSON.stringify({token,move:uci})});
+    else if(mode==='local')d=await api('/api/local2/move/'+token,{method:'POST',body:JSON.stringify({move:uci})});
+    else d=await api('/api/local/move/'+token,{method:'POST',body:JSON.stringify({move:uci})});
+    update(d.state);
+    if(d.ai_move) playSound('move');
+  }catch(e){toast(e.message)}
+  $('thinking').classList.add('hidden');
+}
+function checkResult(){if(!state)return;if(state.opponent_left){stopPoll();$('resultTitle').textContent='PLAYER LEFT';$('resultText').textContent=(state.left_name||'The other player')+' left the game.';$('resultOverlay').classList.remove('hidden');return}if(state.status==='checkmate'||state.status==='stalemate'){stopPoll();$('resultTitle').textContent=state.status.toUpperCase();$('resultText').textContent=state.status==='stalemate'?'The game is drawn.':((state.turn==='white'?state.black_name:state.white_name)+' wins this game.');$('resultOverlay').classList.remove('hidden')}}
+function playSound(type){if(!soundOn)return;try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.frequency.value=type==='move'?420:280;g.gain.value=.035;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.08)}catch{}}
+const qs=new URLSearchParams(location.search);if(qs.get('room') && qs.get('mode')==='online'){window.shareUrl=location.href;
+$('roomCodeInput').value=qs.get('room').toUpperCase();setMode('online');$('joinBox').classList.remove('hidden');$('showJoin').classList.add('primary');$('createRoom').classList.remove('primary');$('startBtn').classList.remove('hidden');$('startBtn').textContent='Join Room';$('setupHint').textContent='Enter your name and join the online room.';}
+window.addEventListener('beforeunload',()=>{if(mode==='online'&&room&&token&&!leaving){try{navigator.sendBeacon('/api/room/'+room+'/leave',new Blob([JSON.stringify({token})],{type:'application/json'}))}catch{}}});
+</script>
+</body>
+</html>
