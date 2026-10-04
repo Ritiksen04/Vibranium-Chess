@@ -18,6 +18,7 @@ A modern Python + HTML chess experience powered by the original Vibranium engine
 - Black and white squares only.
 - High-contrast black/white pieces.
 
+  
 ## Run
 ```powershell
 python app.py
